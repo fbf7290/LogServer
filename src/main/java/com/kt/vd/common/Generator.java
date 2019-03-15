@@ -23,7 +23,7 @@ public class Generator {
         long numOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
         List<String> collect = IntStream.iterate(0, i -> i + 1)
                 .limit(numOfDaysBetween)
-                .mapToObj(i -> index+"-"+startDate.plusDays(i).toString())
+                .mapToObj(i -> index+startDate.plusDays(i).toString())
                 .collect(Collectors.toList());
 
         return collect.toArray(new String[collect.size()]);
