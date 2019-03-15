@@ -29,18 +29,7 @@ public class SellController {
     ElasticsearchTemplate esTemplate;
 
     static final String index = "sell-";
-
-
-    @RequestMapping(value = {"/test/{user}","/test/{user}/{machine}"})
-    public String test(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine){
-        if(machine.isPresent()){
-            System.out.println("hi");
-        }else{
-            System.out.println("SD");
-        }
-
-        return "SDFDSF";
-    }
+    
 
     @RequestMapping(value = {"/{user}","/{user}/{machine}"})
     public List<Map<String,Object>> getSellInfoByMachine(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
