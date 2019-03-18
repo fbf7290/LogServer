@@ -10,6 +10,7 @@ import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.ResultsExtractor;
@@ -34,8 +35,7 @@ public class SellController {
     static final String index = "sell-";
 
     /**
-     *
-     *  Return sales volume according to the type of beverage
+     * Return sales volume according to the type of beverage
      *
      * @param user
      * @param machine
@@ -43,19 +43,19 @@ public class SellController {
      * @param end
      * @return
      */
-    @RequestMapping(value = {"/{user}","/{user}/{machine}"})
-    public List<Map<String,Object>> getSellByDrink(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
-                                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-                                                       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end){
+    @RequestMapping(value = {"/{user}", "/{user}/{machine}"})
+    public List<Map<String, Object>> getSellByDrink(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
+                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
 
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
         QueryBuilder query;
-        if(machine.isPresent()){
+        if (machine.isPresent()) {
             query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
                     .must(termQuery("machine_id", machine.get())));
-        }else{
+        } else {
             query = constantScoreQuery(boolQuery().must(termQuery("user_id", user)));
         }
 
@@ -63,7 +63,7 @@ public class SellController {
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(query)
                 .withIndices(index_names)
-                .addAggregation(AggregationBuilders.terms("agg").field("drink_type"))
+                .addAggregation(AggregationBuilders.terms("agg").field("drink_type").size(50))
                 .build();
 
         Aggregations aggregations = esTemplate.query(searchQuery, new ResultsExtractor<Aggregations>() {
@@ -75,7 +75,7 @@ public class SellController {
         Terms agg = aggregations.get("agg");
 
 
-        List<Map<String, Object>> responseData= new ArrayList<>();
+        List<Map<String, Object>> responseData = new ArrayList<>();
         for (Terms.Bucket entry : agg.getBuckets()) {
             Map<String, Object> data = new HashMap<>();
             data.put("drink_type", entry.getKey());
@@ -87,7 +87,6 @@ public class SellController {
     }
 
     /**
-     *
      * Return sales volume according to the hour
      *
      * @param user
@@ -97,17 +96,17 @@ public class SellController {
      * @return
      */
     @RequestMapping(value = {"/time/{user}", "/time/{user}/{machine}"})
-    public List<Map<String,Object>> getSellByTime(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
-                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end){
+    public List<Map<String, Object>> getSellByTime(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
+                                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+                                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
         QueryBuilder query;
-        if(machine.isPresent()){
+        if (machine.isPresent()) {
             query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
                     .must(termQuery("machine_id", machine.get())));
-        }else{
+        } else {
             query = constantScoreQuery(boolQuery().must(termQuery("user_id", user)));
         }
 
@@ -128,7 +127,7 @@ public class SellController {
         Terms agg = aggregations.get("agg");
 
 
-        List<Map<String, Object>> responseData= new ArrayList<>();
+        List<Map<String, Object>> responseData = new ArrayList<>();
         for (Terms.Bucket entry : agg.getBuckets()) {
             Map<String, Object> data = new HashMap<>();
             data.put("hour", entry.getKey());
@@ -141,8 +140,7 @@ public class SellController {
 
 
     /**
-     *
-     *  Return drink sell volume by drink
+     * Return drink sell volume by drink
      *
      * @param user
      * @param machine
@@ -152,20 +150,20 @@ public class SellController {
      * @return
      */
     @RequestMapping(value = {"/drink/{user}/{drink}", "/drink/{user}/{machine}/{drink}"})
-    public long getSellDrink(@PathVariable String user, @PathVariable(required = false, name= "machine") Optional<Integer> machine,
-                                                 @PathVariable(name="drink") String drink,
-                                                 @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-                                                 @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end){
+    public long getSellDrink(@PathVariable String user, @PathVariable(required = false, value = "machine") Optional<Integer> machine,
+                             @PathVariable(value = "drink") String drink,
+                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
         QueryBuilder query;
 
-        if(machine.isPresent()){
+        if (machine.isPresent()) {
             query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
                     .must(termQuery("machine_id", machine.get()))
                     .must(termQuery("drink_type", drink)));
-        }else{
+        } else {
             query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
                     .must(termQuery("drink_type", drink)));
         }
@@ -180,4 +178,117 @@ public class SellController {
         long count = esTemplate.count(searchQuery);
         return count;
     }
+
+
+    /**
+     * Return drink sell volume according to the location
+     *
+     * @param megal
+     * @param user
+     * @param district
+     * @param start
+     * @param end
+     * @return
+     */
+    @RequestMapping(value = {"loc/{megal}/{user}", "loc/{megal}/{district}/{user}"})
+    public List<Map<String, List<Map<String, Object>>>> getSellByLoc(@PathVariable String megal, @PathVariable(value = "user") String user,
+                                                                     @PathVariable(required = false, value = "district") Optional<String> district,
+                                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+                                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+
+        String agg_term = "district";
+        String[] index_names = Generator.generateIndex(index, start, end);
+
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user))
+                .must(termQuery("megalopolis", megal));
+        if (district.isPresent()) {
+            boolQuery.must(termQuery("district", district.get()));
+            agg_term = "avenue";
+        }
+
+        SearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(constantScoreQuery(boolQuery))
+                .withIndices(index_names)
+                .addAggregation(AggregationBuilders.terms("main").field(agg_term)
+                        .subAggregation(AggregationBuilders.terms("sub").field("drink_type")))
+                .build();
+
+        Aggregations aggregations = esTemplate.query(searchQuery, new ResultsExtractor<Aggregations>() {
+            @Override
+            public Aggregations extract(SearchResponse response) {
+                return response.getAggregations();
+            }
+        });
+
+        Terms mainAggs = aggregations.get("main");
+        List<Map<String, List<Map<String, Object>>>> responseData = new ArrayList<>();
+        String mainKey;
+
+        for (Terms.Bucket subAgg : mainAggs.getBuckets()) {
+            Map<String, List<Map<String, Object>>> mainData = new HashMap<>();
+            List<Map<String, Object>> subData = new ArrayList<>();
+
+            Terms subTerms = subAgg.getAggregations().get("sub");
+
+            for (Terms.Bucket entry : subTerms.getBuckets()) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("drink", entry.getKey());
+                data.put("count", entry.getDocCount());
+
+                subData.add(data);
+            }
+            mainData.put(subAgg.getKeyAsString(), subData);
+            responseData.add(mainData);
+        }
+
+        return responseData;
+    }
+
+
+    @RequestMapping(value = {"/{drink}/loc/{megal}/{user}", "/{drink}/loc/{megal}/{district}/{user}"})
+    public List<Map<String,Object>> getSellDrinkByLoc(@PathVariable String drink,
+                                                      @PathVariable String megal, @PathVariable(value = "user") String user,
+                                                      @PathVariable(required = false, value = "district") Optional<String> district,
+                                                      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+                                                      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end){
+
+        String agg_term = "district";
+        String[] index_names = Generator.generateIndex(index, start, end);
+
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user))
+                .must(termQuery("drink_type", drink))
+                .must(termQuery("megalopolis", megal));
+        if (district.isPresent()) {
+            boolQuery.must(termQuery("district", district.get()));
+            agg_term = "avenue";
+        }
+
+        SearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(constantScoreQuery(boolQuery))
+                .withIndices(index_names)
+                .addAggregation(AggregationBuilders.terms("agg").field(agg_term))
+                .build();
+
+        Aggregations aggregations = esTemplate.query(searchQuery, new ResultsExtractor<Aggregations>() {
+            @Override
+            public Aggregations extract(SearchResponse response) {
+                return response.getAggregations();
+            }
+        });
+
+
+        Terms agg = aggregations.get("agg");
+
+
+        List<Map<String, Object>> responseData = new ArrayList<>();
+        for (Terms.Bucket entry : agg.getBuckets()) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("loc", entry.getKey());
+            data.put("count", entry.getDocCount());
+
+            responseData.add(data);
+        }
+        return responseData;
+    }
 }
+
