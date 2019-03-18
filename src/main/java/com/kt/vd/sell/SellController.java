@@ -51,17 +51,12 @@ public class SellController {
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        QueryBuilder query;
-        if (machine.isPresent()) {
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
-                    .must(termQuery("machine_id", machine.get())));
-        } else {
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user)));
-        }
-
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user));
+        if (machine.isPresent())
+            boolQuery.must(termQuery("machine_id", machine.get()));
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(query)
+                .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
                 .addAggregation(AggregationBuilders.terms("agg").field("drink_type").size(50))
                 .build();
@@ -102,17 +97,14 @@ public class SellController {
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        QueryBuilder query;
-        if (machine.isPresent()) {
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
-                    .must(termQuery("machine_id", machine.get())));
-        } else {
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user)));
-        }
+
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user));
+        if (machine.isPresent())
+            boolQuery.must(termQuery("machine_id", machine.get()));
 
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(query)
+                .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
                 .addAggregation(AggregationBuilders.terms("agg").field("hour_of_day").size(24).order(Terms.Order.term(true)))
                 .build();
@@ -157,20 +149,14 @@ public class SellController {
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        QueryBuilder query;
 
-        if (machine.isPresent()) {
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
-                    .must(termQuery("machine_id", machine.get()))
-                    .must(termQuery("drink_type", drink)));
-        } else {
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
-                    .must(termQuery("drink_type", drink)));
-        }
-
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user))
+                        .must(termQuery("drink_type", drink));
+        if (machine.isPresent())
+            boolQuery.must(termQuery("machine_id", machine.get()));
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(query)
+                .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
                 .build();
 
