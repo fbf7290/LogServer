@@ -4,6 +4,7 @@ package com.kt.vd.visit;
 import com.kt.vd.common.Generator;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
@@ -19,8 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.*;
 
-import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
-import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 @RestController
 @RequestMapping(value = "/visit", method =  RequestMethod.GET )
@@ -30,6 +30,17 @@ public class VisitController {
 
     static final String index = "visit-";
 
+
+    /**
+     *
+     * Return visit count according to the hour
+     *
+     * @param user
+     * @param machine
+     * @param start
+     * @param end
+     * @return
+     */
     @RequestMapping(value = {"/{user}","/{user}/{machine}"})
     public List<Map<String,Object>> getVisitByMachine(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
                                                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
@@ -37,12 +48,12 @@ public class VisitController {
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        BoolQueryBuilder query;
+        QueryBuilder query;
         if(machine.isPresent()){
-            query = boolQuery().must(matchQuery("user_id", user))
-                    .must(matchQuery("machine_id", machine.get()));
+            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
+                    .must(termQuery("machine_id", machine.get())));
         }else{
-            query = boolQuery().must(matchQuery("user_id", user));
+            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user)));
         }
 
 
@@ -73,7 +84,5 @@ public class VisitController {
             responseData.add(data);
         }
         return responseData;
-
-
     }
 }

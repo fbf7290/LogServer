@@ -1,6 +1,7 @@
 package com.kt.vd.humidity;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
-import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 @RestController
 @RequestMapping(value = "/humidity", method =  RequestMethod.GET )
@@ -54,18 +54,17 @@ public class HumidityController {
         String index_name = index + date.toString();
 
 
-        BoolQueryBuilder query = boolQuery().must(matchQuery("user_id", user))
-                .must(matchQuery("machine_id", machine))
-                .must(matchQuery("lane", lane));
+        QueryBuilder query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
+                .must(termQuery("machine_id", machine))
+                .must(termQuery("lane", lane)));
 
         RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("date")
                 .gte(datetimeMinus10.format(formatter))
                 .lte(datetime.format(formatter));
 
-        query.filter(rangeQueryBuilder);
-
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(query).withQuery(query)
+                .withQuery(query)
+                .withFilter(rangeQueryBuilder)
                 .withIndices(index_name)
                 .build();
 
