@@ -17,10 +17,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
@@ -33,15 +30,21 @@ public class VisitController {
 
     static final String index = "visit-";
 
-    @RequestMapping("{user}/{machine}")
-    public List<Map<String,Object>> getVisitByMachine(@PathVariable String user, @PathVariable int machine,
+    @RequestMapping(value = {"/{user}","/{user}/{machine}"})
+    public List<Map<String,Object>> getVisitByMachine(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
                                                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end){
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        BoolQueryBuilder query = boolQuery().must(matchQuery("user_id", user))
-                .must(matchQuery("machine_id", machine));
+        BoolQueryBuilder query;
+        if(machine.isPresent()){
+            query = boolQuery().must(matchQuery("user_id", user))
+                    .must(matchQuery("machine_id", machine.get()));
+        }else{
+            query = boolQuery().must(matchQuery("user_id", user));
+        }
+
 
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
