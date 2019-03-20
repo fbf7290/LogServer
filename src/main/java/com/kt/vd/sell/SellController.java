@@ -44,16 +44,16 @@ public class SellController {
      * @return
      */
     @RequestMapping(value = {"/{user}", "/{user}/{machine}"})
-    public List<Map<String, Object>> getSellByDrink(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
+    public List<Map<String, Object>> getSellByDrink(@PathVariable String user, @PathVariable(required = false) Optional<String> machine,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
 
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user));
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user", user));
         if (machine.isPresent())
-            boolQuery.must(termQuery("machine_id", machine.get()));
+            boolQuery.must(termQuery("machine", machine.get()));
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(constantScoreQuery(boolQuery))
@@ -91,16 +91,16 @@ public class SellController {
      * @return
      */
     @RequestMapping(value = {"/time/{user}", "/time/{user}/{machine}"})
-    public List<Map<String, Object>> getSellByTime(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
+    public List<Map<String, Object>> getSellByTime(@PathVariable String user, @PathVariable(required = false) Optional<String> machine,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
 
-        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user));
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user", user));
         if (machine.isPresent())
-            boolQuery.must(termQuery("machine_id", machine.get()));
+            boolQuery.must(termQuery("machine", machine.get()));
 
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
@@ -142,7 +142,7 @@ public class SellController {
      * @return
      */
     @RequestMapping(value = {"/drink/{user}/{drink}", "/drink/{user}/{machine}/{drink}"})
-    public long getSellDrink(@PathVariable String user, @PathVariable(required = false, value = "machine") Optional<Integer> machine,
+    public long getSellDrink(@PathVariable String user, @PathVariable(required = false, value = "machine") Optional<String> machine,
                              @PathVariable(value = "drink") String drink,
                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
@@ -150,10 +150,10 @@ public class SellController {
         String[] index_names = Generator.generateIndex(index, start, end);
 
 
-        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user))
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user", user))
                         .must(termQuery("drink_type", drink));
         if (machine.isPresent())
-            boolQuery.must(termQuery("machine_id", machine.get()));
+            boolQuery.must(termQuery("machine", machine.get()));
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(constantScoreQuery(boolQuery))
@@ -185,7 +185,7 @@ public class SellController {
         String agg_term = "district";
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user))
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user", user))
                 .must(termQuery("megalopolis", megal));
         if (district.isPresent()) {
             boolQuery.must(termQuery("district", district.get()));
@@ -241,7 +241,7 @@ public class SellController {
         String agg_term = "district";
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user_id", user))
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user", user))
                 .must(termQuery("drink_type", drink))
                 .must(termQuery("megalopolis", megal));
         if (district.isPresent()) {

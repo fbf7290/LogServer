@@ -43,7 +43,7 @@ public class TemperatureController {
      * @param lane
      * @return
      */
-    private List<Map<String,Object>> getTemperatureByInterval(String user, int machine, int lane, int interval){
+    private List<Map<String,Object>> getTemperatureByInterval(String user, String machine, int lane, int interval){
 
         LocalDateTime datetime = LocalDateTime.now();
         LocalDate date = datetime.toLocalDate();
@@ -52,8 +52,8 @@ public class TemperatureController {
         String index_name = index + date.toString();
 
 
-        QueryBuilder query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
-                .must(termQuery("machine_id", machine))
+        QueryBuilder query = constantScoreQuery(boolQuery().must(termQuery("user", user))
+                .must(termQuery("machine", machine))
                 .must(termQuery("lane", lane)));
 
         RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("date")
@@ -98,7 +98,7 @@ public class TemperatureController {
      * @return
      */
     @RequestMapping("/init/{user}/{machine}/{lane}")
-    public List<Map<String,Object>> getTemperatureInit(@PathVariable String user, @PathVariable int machine,
+    public List<Map<String,Object>> getTemperatureInit(@PathVariable String user, @PathVariable String machine,
                                                    @PathVariable int lane){
         return getTemperatureByInterval(user, machine, lane, 10);
     }
@@ -115,7 +115,7 @@ public class TemperatureController {
      * @return
      */
     @RequestMapping("/{user}/{machine}/{lane}")
-    public List<Map<String,Object>> getTemperature(@PathVariable String user, @PathVariable int machine,
+    public List<Map<String,Object>> getTemperature(@PathVariable String user, @PathVariable String machine,
                                                        @PathVariable int lane){
         return getTemperatureByInterval(user, machine, lane, 1);
     }

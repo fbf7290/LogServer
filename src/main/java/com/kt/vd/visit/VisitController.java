@@ -2,6 +2,7 @@ package com.kt.vd.visit;
 
 
 import com.kt.vd.common.Generator;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -43,28 +44,21 @@ public class VisitController {
      * @return
      */
     @RequestMapping(value = {"/{user}","/{user}/{machine}"})
-    public List<Map<String,Object>> getVisitByMachine(@PathVariable String user, @PathVariable(required = false) Optional<Integer> machine,
+    public List<Map<String,Object>> getVisitByMachine(@PathVariable String user, @PathVariable(required = false) Optional<String> machine,
                                                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end){
 
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        QueryBuilder query;
-        if(machine.isPresent()){
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
-                    .must(termQuery("machine_id", machine.get())));
-        }else{
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user)));
-        }
-
-
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user", user));
+        if(machine.isPresent())
+            boolQuery.must(termQuery("machine", machine.get()));
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(query)
+                .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
                 .addAggregation(AggregationBuilders.terms("agg").field("hour_of_day").size(24).order(Terms.Order.term(true)))
                 .build();
-
 
 
         Aggregations aggregations = esTemplate.query(searchQuery, new ResultsExtractor<Aggregations>() {
@@ -105,31 +99,21 @@ public class VisitController {
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end){
 
+        String agg_term = "district";
         String[] index_names = Generator.generateIndex(index, start, end);
 
-        QueryBuilder query;
-        SearchQuery searchQuery;
-
+        BoolQueryBuilder boolQuery = boolQuery().must(termQuery("user", user))
+                .must(termQuery("megalopolis", megal));
         if(district.isPresent()){
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
-                    .must(termQuery("megalopolis", megal))
-                    .must(termQuery("district", district.get())));
-
-            searchQuery = new NativeSearchQueryBuilder()
-                    .withQuery(query)
-                    .withIndices(index_names)
-                    .addAggregation(AggregationBuilders.terms("agg").field("avenue").size(50))
-                    .build();
-        }else{
-            query = constantScoreQuery(boolQuery().must(termQuery("user_id", user))
-                    .must(termQuery("megalopolis", megal)));
-
-            searchQuery = new NativeSearchQueryBuilder()
-                    .withQuery(query)
-                    .withIndices(index_names)
-                    .addAggregation(AggregationBuilders.terms("agg").field("district").size(50))
-                    .build();
+            boolQuery.must(termQuery("district", district.get()));
+            agg_term = "avenue";
         }
+
+        SearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(constantScoreQuery(boolQuery))
+                .withIndices(index_names)
+                .addAggregation(AggregationBuilders.terms("agg").field(agg_term))
+                .build();
 
 
         Aggregations aggregations = esTemplate.query(searchQuery, new ResultsExtractor<Aggregations>() {

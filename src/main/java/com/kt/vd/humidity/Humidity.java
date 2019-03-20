@@ -15,8 +15,8 @@ import java.util.Date;
 class Humidity {
     @Id
     private String _id;
-    private String user_id;
-    private int machine_id;
+    private String user;
+    private String machine;
     private int lane;
     private float degree;
 
@@ -26,10 +26,10 @@ class Humidity {
 
     public Humidity() {}
 
-    public Humidity(String _id, String user_id, int machine_id, int lane, float degree, Date date) {
+    public Humidity(String _id, String user, String machine, int lane, float degree, Date date) {
         this._id = _id;
-        this.user_id = user_id;
-        this.machine_id = machine_id;
+        this.user = user;
+        this.machine = machine;
         this.lane = lane;
         this.degree = degree;
         this.date = date;
