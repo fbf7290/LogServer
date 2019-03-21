@@ -25,6 +25,7 @@ import java.util.*;
 import static org.elasticsearch.index.query.QueryBuilders.*;
 import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(value = "/sell", method =  RequestMethod.GET )
 public class SellController {
@@ -58,6 +59,7 @@ public class SellController {
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
+                .withRoute(user)
                 .addAggregation(AggregationBuilders.terms("agg").field("drink_type").size(50))
                 .build();
 
@@ -106,6 +108,7 @@ public class SellController {
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
+                .withRoute(user)
                 .addAggregation(AggregationBuilders.terms("agg").field("hour_of_day").size(24).order(Terms.Order.term(true)))
                 .build();
 
@@ -158,6 +161,7 @@ public class SellController {
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
+                .withRoute(user)
                 .build();
 
 
@@ -195,6 +199,7 @@ public class SellController {
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
+                .withRoute(user)
                 .addAggregation(AggregationBuilders.terms("main").field(agg_term)
                         .subAggregation(AggregationBuilders.terms("sub").field("drink_type")))
                 .build();
@@ -230,7 +235,18 @@ public class SellController {
         return responseData;
     }
 
-
+    /**
+     *
+     * Return drink sell volume according to the location, drink
+     *
+     * @param drink
+     * @param megal
+     * @param user
+     * @param district
+     * @param start
+     * @param end
+     * @return
+     */
     @RequestMapping(value = {"/{drink}/loc/{megal}/{user}", "/{drink}/loc/{megal}/{district}/{user}"})
     public List<Map<String,Object>> getSellDrinkByLoc(@PathVariable String drink,
                                                       @PathVariable String megal, @PathVariable(value = "user") String user,
@@ -252,6 +268,7 @@ public class SellController {
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
+                .withRoute(user)
                 .addAggregation(AggregationBuilders.terms("agg").field(agg_term))
                 .build();
 

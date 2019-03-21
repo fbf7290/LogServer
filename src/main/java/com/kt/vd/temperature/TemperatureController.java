@@ -22,6 +22,7 @@ import java.util.Map;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(value = "/temperature", method =  RequestMethod.GET )
 public class TemperatureController {

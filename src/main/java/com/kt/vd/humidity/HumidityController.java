@@ -9,10 +9,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.data.util.CloseableIterator;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +21,7 @@ import java.util.Map;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(value = "/humidity", method =  RequestMethod.GET )
 public class HumidityController {

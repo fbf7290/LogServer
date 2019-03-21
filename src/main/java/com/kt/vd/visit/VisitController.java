@@ -2,7 +2,6 @@ package com.kt.vd.visit;
 
 
 import com.kt.vd.common.Generator;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -24,6 +23,7 @@ import java.util.*;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(value = "/visit", method =  RequestMethod.GET )
 public class VisitController {
@@ -57,9 +57,9 @@ public class VisitController {
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
+                .withRoute(user)
                 .addAggregation(AggregationBuilders.terms("agg").field("hour_of_day").size(24).order(Terms.Order.term(true)))
                 .build();
-
 
         Aggregations aggregations = esTemplate.query(searchQuery, new ResultsExtractor<Aggregations>() {
             @Override
@@ -112,6 +112,7 @@ public class VisitController {
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(constantScoreQuery(boolQuery))
                 .withIndices(index_names)
+                .withRoute(user)
                 .addAggregation(AggregationBuilders.terms("agg").field(agg_term))
                 .build();
 
