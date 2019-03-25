@@ -137,7 +137,7 @@ public class TemperatureController {
 //                .must(matchQuery("machine_id", machine))
 //                .must(matchQuery("lane", lane));
 //
-//        String[] a = Generator.generateIndex(index_name, start.toLocalDate(), end.toLocalDate());
+//        String[] a = IndexManager.generateIndex(index_name, start.toLocalDate(), end.toLocalDate());
 //        for (String b :
 //                a) {
 //            System.out.println(b);
@@ -145,7 +145,7 @@ public class TemperatureController {
 //
 //        SearchQuery searchQuery = new NativeSearchQueryBuilder()
 //                .withQuery(query)
-//                .withIndices(Generator.generateIndex(index_name, start.toLocalDate(), end.toLocalDate()))
+//                .withIndices(IndexManager.generateIndex(index_name, start.toLocalDate(), end.toLocalDate()))
 //                .build();
 //
 //        CloseableIterator<temperature> stream = esTemplate.stream(searchQuery, temperature.class);

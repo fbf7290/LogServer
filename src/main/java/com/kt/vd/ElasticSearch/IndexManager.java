@@ -1,14 +1,14 @@
-package com.kt.vd.common;
+package com.kt.vd.ElasticSearch;
 
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class Generator {
+public class IndexManager {
 
 
     /**
@@ -20,6 +20,10 @@ public class Generator {
      * @return
      */
     public static String[] generateIndex(String index, LocalDate startDate, LocalDate endDate){
+        LocalDate now = LocalDate.now();
+        if(endDate.isAfter(now))
+            endDate = now;
+
         long numOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
         List<String> collect = IntStream.iterate(0, i -> i + 1)
                 .limit(numOfDaysBetween)
@@ -28,5 +32,4 @@ public class Generator {
 
         return collect.toArray(new String[collect.size()]);
     }
-
 }
