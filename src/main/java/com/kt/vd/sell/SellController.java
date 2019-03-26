@@ -2,6 +2,10 @@ package com.kt.vd.sell;
 
 
 import com.kt.vd.ElasticSearch.IndexManager;
+import com.kt.vd.Redis.IntegerResult;
+import com.kt.vd.Redis.JsonListResult;
+import com.kt.vd.Redis.JsonListsResult;
+import com.kt.vd.Redis.RedisManager;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
@@ -28,8 +33,15 @@ public class SellController {
 
     @Autowired
     ElasticsearchTemplate esTemplate;
+    @Autowired
+    RedisManager redisManager;
 
-    static final String index = "sell-";
+    static final private String index = "sell-";
+    static final private String sellByDrinkPrefix = "sell";
+    static final private String sellByTimePrefix = "sell:time";
+    static final private String sellDrinkPrefix = "sell:drink";
+    static final private String sellByLocPrefix = "sell:loc";
+    static final private String sellByDrinkAllPrefix = "sell:all";
 
     /**
      * Return sales volume according to the type of beverage
@@ -44,6 +56,19 @@ public class SellController {
     public List<Map<String, Object>> getSellByDrink(@PathVariable String user, @PathVariable(required = false) Optional<String> machine,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+
+        boolean cacheFlag = false;
+
+        JsonListResult cacheData;
+        if(machine.isPresent()){
+            cacheData = redisManager.getJsonListResult(end, sellByDrinkPrefix, user, machine.get(), start.toString(), end.toString());
+        }else{
+            cacheData = redisManager.getJsonListResult(end, sellByDrinkPrefix, user,  start.toString(), end.toString());
+        }
+        if(cacheData.getValue() != null)
+            return cacheData.getValue();
+        else
+            cacheFlag = true;
 
 
         String[] index_names = IndexManager.generateIndex(index, start, end);
@@ -76,6 +101,11 @@ public class SellController {
 
             responseData.add(data);
         }
+
+        if(cacheFlag){
+            redisManager.setJsonListOpts(cacheData.getKey(), responseData, 1, TimeUnit.HOURS);
+        }
+
         return responseData;
     }
 
@@ -92,6 +122,20 @@ public class SellController {
     public List<Map<String, Object>> getSellByTime(@PathVariable String user, @PathVariable(required = false) Optional<String> machine,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+
+
+        boolean cacheFlag = false;
+
+        JsonListResult cacheData;
+        if(machine.isPresent()){
+            cacheData = redisManager.getJsonListResult(end, sellByTimePrefix, user, machine.get(), start.toString(), end.toString());
+        }else{
+            cacheData = redisManager.getJsonListResult(end, sellByTimePrefix, user,  start.toString(), end.toString());
+        }
+        if(cacheData.getValue() != null)
+            return cacheData.getValue();
+        else
+            cacheFlag = true;
 
         String[] index_names = IndexManager.generateIndex(index, start, end);
 
@@ -126,6 +170,11 @@ public class SellController {
 
             responseData.add(data);
         }
+
+        if(cacheFlag){
+            redisManager.setJsonListOpts(cacheData.getKey(), responseData, 1, TimeUnit.HOURS);
+        }
+
         return responseData;
     }
 
@@ -141,10 +190,23 @@ public class SellController {
      * @return
      */
     @RequestMapping(value = {"/drink/{user}/{drink}", "/drink/{user}/{machine}/{drink}"})
-    public long getSellDrink(@PathVariable String user, @PathVariable(required = false, value = "machine") Optional<String> machine,
+    public Integer getSellDrink(@PathVariable String user, @PathVariable(required = false, value = "machine") Optional<String> machine,
                              @PathVariable(value = "drink") String drink,
                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+
+        boolean cacheFlag = false;
+        IntegerResult cacheData;
+        if(machine.isPresent()){
+            cacheData = redisManager.getIntegerResult(end, sellDrinkPrefix, drink, user, machine.get(), start.toString(), end.toString());
+        }else{
+            cacheData = redisManager.getIntegerResult(end, sellDrinkPrefix, drink, user, start.toString(), end.toString());
+        }
+        if(cacheData.getValue() != null)
+            return cacheData.getValue();
+        else
+            cacheFlag = true;
+
 
         String[] index_names = IndexManager.generateIndex(index, start, end);
 
@@ -161,8 +223,13 @@ public class SellController {
                 .build();
 
 
-        long count = esTemplate.count(searchQuery);
-        return count;
+        Long count = esTemplate.count(searchQuery);
+
+        if(cacheFlag){
+            redisManager.setIntegerOpts(cacheData.getKey(), count.intValue(), 1, TimeUnit.HOURS);
+        }
+
+        return count.intValue();
     }
 
 
@@ -181,6 +248,19 @@ public class SellController {
                                                                      @PathVariable(required = false, value = "municipality") Optional<String> municipality,
                                                                      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                                      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+
+        boolean cacheFlag = false;
+
+        JsonListsResult cacheData;
+        if(municipality.isPresent()){
+            cacheData = redisManager.getJsonListsResult(end, sellByLocPrefix, province, municipality.get(), user, start.toString(), end.toString());
+        }else{
+            cacheData = redisManager.getJsonListsResult(end, sellByLocPrefix, province, user, start.toString(), end.toString());
+        }
+        if(cacheData.getValue() != null)
+            return cacheData.getValue();
+        else
+            cacheFlag = true;
 
         String agg_term = "municipality";
         String[] index_names = IndexManager.generateIndex(index, start, end);
@@ -228,6 +308,11 @@ public class SellController {
             responseData.add(mainData);
         }
 
+
+        if(cacheFlag){
+            redisManager.setJsonListsOpts(cacheData.getKey(), responseData, 1, TimeUnit.HOURS);
+        }
+
         return responseData;
     }
 
@@ -249,6 +334,20 @@ public class SellController {
                                                       @PathVariable(required = false, value = "municipality") Optional<String> municipality,
                                                       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end){
+
+        boolean cacheFlag = false;
+
+        JsonListResult cacheData;
+        if(municipality.isPresent()){
+            cacheData = redisManager.getJsonListResult(end, sellByLocPrefix, province, municipality.get(), drink, start.toString(), end.toString());
+        }else{
+            cacheData = redisManager.getJsonListResult(end, sellByLocPrefix, province, drink, start.toString(), end.toString());
+        }
+        if(cacheData.getValue() != null)
+            return cacheData.getValue();
+        else
+            cacheFlag = true;
+
 
         String agg_term = "municipality";
         String[] index_names = IndexManager.generateIndex(index, start, end);
@@ -287,15 +386,28 @@ public class SellController {
 
             responseData.add(data);
         }
+
+        if(cacheFlag){
+            redisManager.setJsonListOpts(cacheData.getKey(), responseData, 1, TimeUnit.HOURS);
+        }
+
         return responseData;
     }
 
     @RequestMapping(value = {"/all/{top}","/all"})
-    public List<Map<String,Object>> getSellByDrink(@PathVariable(required = false) Optional<Integer> top,
+    public List<Map<String,Object>> getSellByDrinkAll(@PathVariable(required = false) Optional<Integer> top,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end){
 
-        System.out.println(top.orElse(10));
+        boolean cacheFlag = false;
+
+        JsonListResult cacheData = redisManager.getJsonListResult(end, sellByDrinkAllPrefix, top.orElse(10).toString() , start.toString(), end.toString());
+        if(cacheData.getValue() != null)
+            return cacheData.getValue();
+        else
+            cacheFlag = true;
+
+
 
         String[] index_names = IndexManager.generateIndex(index, start, end);
 
@@ -323,6 +435,11 @@ public class SellController {
 
             responseData.add(data);
         }
+
+        if(cacheFlag){
+            redisManager.setJsonListOpts(cacheData.getKey(), responseData, 30, TimeUnit.DAYS);
+        }
+
         return responseData;
 
 

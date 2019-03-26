@@ -3,16 +3,16 @@ package com.kt.vd.Redis;
 
 import lombok.Data;
 
-public class LongResult extends RedisResult{
+public class IntegerResult extends RedisResult{
     private String key;
-    private Long value;
+    private Integer value;
 
-    public LongResult(String key, Long value) {
+    public IntegerResult(String key, Integer value) {
         this.key = key;
         this.value = value;
     }
 
-    public LongResult(String key) {
+    public IntegerResult(String key) {
         this.key = key;
         this.value = null;
     }
@@ -25,11 +25,11 @@ public class LongResult extends RedisResult{
         this.key = key;
     }
 
-    public Long getValue() {
+    public Integer getValue() {
         return value;
     }
 
-    public void setValue(Long value) {
+    public void setValue(Integer value) {
         this.value = value;
     }
 }

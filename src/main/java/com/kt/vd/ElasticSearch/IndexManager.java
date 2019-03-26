@@ -1,6 +1,10 @@
 package com.kt.vd.ElasticSearch;
 
 
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -9,6 +13,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class IndexManager {
+
+
+    @Autowired
+    ElasticsearchTemplate esTemplate;
+
+    void test(){
+        esTemplate.getClient().admin().indices().getIndex(new GetIndexRequest().indices("sell-*")).actionGet().getIndices();
+    }
 
 
     /**

@@ -34,10 +34,6 @@ public class VisitController {
     ElasticsearchTemplate esTemplate;
     @Autowired
     RedisManager redisManager;
-    @Resource(name="redisTemplate")
-    ValueOperations<String, List<Map<String,Object>>> valueOpts;
-
-
 
     static final private String index = "visit-";
     static final private String visitByMahcinePrefix = "visit";
@@ -104,7 +100,7 @@ public class VisitController {
         }
 
         if(cacheFlag){
-            valueOpts.set(cacheData.getKey(), responseData, 1, TimeUnit.HOURS);
+            redisManager.setJsonListOpts(cacheData.getKey(), responseData, 1, TimeUnit.HOURS);
         }
 
         return responseData;
@@ -180,7 +176,7 @@ public class VisitController {
         }
 
         if(cacheFlag){
-            valueOpts.set(cacheData.getKey(), responseData, 1, TimeUnit.HOURS);
+            redisManager.setJsonListOpts(cacheData.getKey(), responseData, 1, TimeUnit.HOURS);
         }
 
         return responseData;
