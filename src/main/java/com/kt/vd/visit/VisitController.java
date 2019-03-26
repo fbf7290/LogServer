@@ -56,17 +56,19 @@ public class VisitController {
 
         boolean cacheFlag = false;
 
-        JsonListResult cacheData;
-        if(machine.isPresent()){
-            cacheData = redisManager.getJsonListResult(end, visitByMahcinePrefix, user, machine.get(), start.toString(), end.toString());
-        }else{
-            cacheData = redisManager.getJsonListResult(end, visitByMahcinePrefix, user,  start.toString(), end.toString());
-        }
-        if(cacheData.getValue() != null)
-            return cacheData.getValue();
-        else
-            cacheFlag = true;
+        JsonListResult cacheData = null;
 
+        if(!redisManager.permitCache(end)) {
+            if (machine.isPresent()) {
+                cacheData = redisManager.getJsonListResult(end, visitByMahcinePrefix, user, machine.get(), start.toString(), end.toString());
+            } else {
+                cacheData = redisManager.getJsonListResult(end, visitByMahcinePrefix, user, start.toString(), end.toString());
+            }
+            if (cacheData.getValue() != null)
+                return cacheData.getValue();
+            else
+                cacheFlag = true;
+        }
 
         String[] index_names = IndexManager.generateIndex(index, start, end);
 
@@ -127,17 +129,19 @@ public class VisitController {
 
         boolean cacheFlag = false;
 
-        JsonListResult cacheData;
-        if(municipality.isPresent()){
-            cacheData = redisManager.getJsonListResult(end, visitByLocPrefix, province, municipality.get(), user, start.toString(), end.toString());
-        }else{
-            cacheData = redisManager.getJsonListResult(end, visitByLocPrefix, province, user, start.toString(), end.toString());
-        }
-        if(cacheData.getValue() != null)
-            return cacheData.getValue();
-        else
-            cacheFlag = true;
+        JsonListResult cacheData = null;
 
+        if(!redisManager.permitCache(end)) {
+            if (municipality.isPresent()) {
+                cacheData = redisManager.getJsonListResult(end, visitByLocPrefix, province, municipality.get(), user, start.toString(), end.toString());
+            } else {
+                cacheData = redisManager.getJsonListResult(end, visitByLocPrefix, province, user, start.toString(), end.toString());
+            }
+            if (cacheData.getValue() != null)
+                return cacheData.getValue();
+            else
+                cacheFlag = true;
+        }
 
 
         String agg_term = "municipality";

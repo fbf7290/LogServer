@@ -2,10 +2,16 @@ package com.kt.vd.Redis;
 
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ValueOperations;
+
+import javax.annotation.Resource;
 
 public class IntegerResult extends RedisResult{
     private String key;
     private Integer value;
+
+
 
     public IntegerResult(String key, Integer value) {
         this.key = key;

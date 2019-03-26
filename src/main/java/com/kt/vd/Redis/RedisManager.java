@@ -29,11 +29,10 @@ public class RedisManager {
      * @param date
      * @return
      */
-    private boolean isLegal(LocalDate date){
+    public boolean permitCache(LocalDate date){
         LocalDate today = LocalDate.now();
-        if(date.isBefore(today))
+        if(date.isAfter(today))
             return true;
-
         return false;
     }
 
@@ -58,19 +57,13 @@ public class RedisManager {
     public JsonListResult getJsonListResult(LocalDate end, String prefix, String... parameters){
         String key = this.generateRedisKey(prefix, parameters);
 
-        if(!this.isLegal(end))
-            return new JsonListResult(key);
-
-        List<Map<String, Object>> value = jsonListOpts.get(key);
-        return new JsonListResult(key, value);
+        return new JsonListResult(key, jsonListOpts.get(key));
     }
+
 
     public IntegerResult getIntegerResult(LocalDate end, String prefix, String... parameters){
 
         String key = this.generateRedisKey(prefix, parameters);
-
-        if(!this.isLegal(end))
-            return new IntegerResult(key);
 
         return new IntegerResult(key, integerOpts.get(key));
     }
@@ -80,17 +73,14 @@ public class RedisManager {
 
         String key = this.generateRedisKey(prefix, parameters);
 
-        if(!this.isLegal(end))
-            return new JsonListsResult(key);
-
-        List<Map<String, List<Map<String, Object>>>> value = jsonListsOpts.get(key);
-
-        return new JsonListsResult(key, value);
+        return new JsonListsResult(key, jsonListsOpts.get(key));
     }
+
 
     public void setJsonListOpts(String key, List<Map<String,Object>> value, int time, TimeUnit timeUnit){
         jsonListOpts.set(key, value, time, timeUnit);
     }
+
 
     public void setJsonListsOpts(String key, List<Map<String,List<Map<String,Object>>>> value, int time, TimeUnit timeUnit){
         jsonListsOpts.set(key, value, time, timeUnit);

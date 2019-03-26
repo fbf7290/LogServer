@@ -58,17 +58,20 @@ public class SellController {
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
 
         boolean cacheFlag = false;
+        JsonListResult cacheData = null;
 
-        JsonListResult cacheData;
-        if(machine.isPresent()){
-            cacheData = redisManager.getJsonListResult(end, sellByDrinkPrefix, user, machine.get(), start.toString(), end.toString());
-        }else{
-            cacheData = redisManager.getJsonListResult(end, sellByDrinkPrefix, user,  start.toString(), end.toString());
+        if(!redisManager.permitCache(end)){
+            if(machine.isPresent()){
+                cacheData = redisManager.getJsonListResult(end, sellByDrinkPrefix, user, machine.get(), start.toString(), end.toString());
+            }else{
+                cacheData = redisManager.getJsonListResult(end, sellByDrinkPrefix, user,  start.toString(), end.toString());
+            }
+            if(cacheData.getValue() != null)
+                return cacheData.getValue();
+            else
+                cacheFlag = true;
         }
-        if(cacheData.getValue() != null)
-            return cacheData.getValue();
-        else
-            cacheFlag = true;
+
 
 
         String[] index_names = IndexManager.generateIndex(index, start, end);
@@ -126,16 +129,19 @@ public class SellController {
 
         boolean cacheFlag = false;
 
-        JsonListResult cacheData;
-        if(machine.isPresent()){
-            cacheData = redisManager.getJsonListResult(end, sellByTimePrefix, user, machine.get(), start.toString(), end.toString());
-        }else{
-            cacheData = redisManager.getJsonListResult(end, sellByTimePrefix, user,  start.toString(), end.toString());
+        JsonListResult cacheData= null;
+
+        if(!redisManager.permitCache(end)) {
+            if (machine.isPresent()) {
+                cacheData = redisManager.getJsonListResult(end, sellByTimePrefix, user, machine.get(), start.toString(), end.toString());
+            } else {
+                cacheData = redisManager.getJsonListResult(end, sellByTimePrefix, user, start.toString(), end.toString());
+            }
+            if (cacheData.getValue() != null)
+                return cacheData.getValue();
+            else
+                cacheFlag = true;
         }
-        if(cacheData.getValue() != null)
-            return cacheData.getValue();
-        else
-            cacheFlag = true;
 
         String[] index_names = IndexManager.generateIndex(index, start, end);
 
@@ -196,17 +202,19 @@ public class SellController {
                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
 
         boolean cacheFlag = false;
-        IntegerResult cacheData;
-        if(machine.isPresent()){
-            cacheData = redisManager.getIntegerResult(end, sellDrinkPrefix, drink, user, machine.get(), start.toString(), end.toString());
-        }else{
-            cacheData = redisManager.getIntegerResult(end, sellDrinkPrefix, drink, user, start.toString(), end.toString());
-        }
-        if(cacheData.getValue() != null)
-            return cacheData.getValue();
-        else
-            cacheFlag = true;
+        IntegerResult cacheData = null;
 
+        if(!redisManager.permitCache(end)) {
+            if (machine.isPresent()) {
+                cacheData = redisManager.getIntegerResult(end, sellDrinkPrefix, drink, user, machine.get(), start.toString(), end.toString());
+            } else {
+                cacheData = redisManager.getIntegerResult(end, sellDrinkPrefix, drink, user, start.toString(), end.toString());
+            }
+            if (cacheData.getValue() != null)
+                return cacheData.getValue();
+            else
+                cacheFlag = true;
+        }
 
         String[] index_names = IndexManager.generateIndex(index, start, end);
 
@@ -251,16 +259,19 @@ public class SellController {
 
         boolean cacheFlag = false;
 
-        JsonListsResult cacheData;
-        if(municipality.isPresent()){
-            cacheData = redisManager.getJsonListsResult(end, sellByLocPrefix, province, municipality.get(), user, start.toString(), end.toString());
-        }else{
-            cacheData = redisManager.getJsonListsResult(end, sellByLocPrefix, province, user, start.toString(), end.toString());
+        JsonListsResult cacheData = null;
+
+        if(!redisManager.permitCache(end)) {
+            if (municipality.isPresent()) {
+                cacheData = redisManager.getJsonListsResult(end, sellByLocPrefix, province, municipality.get(), user, start.toString(), end.toString());
+            } else {
+                cacheData = redisManager.getJsonListsResult(end, sellByLocPrefix, province, user, start.toString(), end.toString());
+            }
+            if (cacheData.getValue() != null)
+                return cacheData.getValue();
+            else
+                cacheFlag = true;
         }
-        if(cacheData.getValue() != null)
-            return cacheData.getValue();
-        else
-            cacheFlag = true;
 
         String agg_term = "municipality";
         String[] index_names = IndexManager.generateIndex(index, start, end);
@@ -337,17 +348,19 @@ public class SellController {
 
         boolean cacheFlag = false;
 
-        JsonListResult cacheData;
-        if(municipality.isPresent()){
-            cacheData = redisManager.getJsonListResult(end, sellByLocPrefix, province, municipality.get(), drink, start.toString(), end.toString());
-        }else{
-            cacheData = redisManager.getJsonListResult(end, sellByLocPrefix, province, drink, start.toString(), end.toString());
-        }
-        if(cacheData.getValue() != null)
-            return cacheData.getValue();
-        else
-            cacheFlag = true;
+        JsonListResult cacheData = null;
 
+        if(!redisManager.permitCache(end)) {
+            if (municipality.isPresent()) {
+                cacheData = redisManager.getJsonListResult(end, sellByLocPrefix, province, municipality.get(), drink, start.toString(), end.toString());
+            } else {
+                cacheData = redisManager.getJsonListResult(end, sellByLocPrefix, province, drink, start.toString(), end.toString());
+            }
+            if (cacheData.getValue() != null)
+                return cacheData.getValue();
+            else
+                cacheFlag = true;
+        }
 
         String agg_term = "municipality";
         String[] index_names = IndexManager.generateIndex(index, start, end);
@@ -401,12 +414,15 @@ public class SellController {
 
         boolean cacheFlag = false;
 
-        JsonListResult cacheData = redisManager.getJsonListResult(end, sellByDrinkAllPrefix, top.orElse(10).toString() , start.toString(), end.toString());
-        if(cacheData.getValue() != null)
-            return cacheData.getValue();
-        else
-            cacheFlag = true;
+        JsonListResult cacheData = null;
 
+        if(!redisManager.permitCache(end)) {
+            cacheData = redisManager.getJsonListResult(end, sellByDrinkAllPrefix, top.orElse(10).toString(), start.toString(), end.toString());
+            if (cacheData.getValue() != null)
+                return cacheData.getValue();
+            else
+                cacheFlag = true;
+        }
 
 
         String[] index_names = IndexManager.generateIndex(index, start, end);
