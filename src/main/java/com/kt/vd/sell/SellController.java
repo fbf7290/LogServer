@@ -62,9 +62,9 @@ public class SellController {
 
         if(!redisManager.permitCache(end)){
             if(machine.isPresent()){
-                cacheData = redisManager.getJsonListResult(end, sellByDrinkPrefix, user, machine.get(), start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(sellByDrinkPrefix, user, machine.get(), start.toString(), end.toString());
             }else{
-                cacheData = redisManager.getJsonListResult(end, sellByDrinkPrefix, user,  start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(sellByDrinkPrefix, user,  start.toString(), end.toString());
             }
             if(cacheData.getValue() != null)
                 return cacheData.getValue();
@@ -133,9 +133,9 @@ public class SellController {
 
         if(!redisManager.permitCache(end)) {
             if (machine.isPresent()) {
-                cacheData = redisManager.getJsonListResult(end, sellByTimePrefix, user, machine.get(), start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(sellByTimePrefix, user, machine.get(), start.toString(), end.toString());
             } else {
-                cacheData = redisManager.getJsonListResult(end, sellByTimePrefix, user, start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(sellByTimePrefix, user, start.toString(), end.toString());
             }
             if (cacheData.getValue() != null)
                 return cacheData.getValue();
@@ -206,9 +206,9 @@ public class SellController {
 
         if(!redisManager.permitCache(end)) {
             if (machine.isPresent()) {
-                cacheData = redisManager.getIntegerResult(end, sellDrinkPrefix, drink, user, machine.get(), start.toString(), end.toString());
+                cacheData = redisManager.getIntegerResult(sellDrinkPrefix, drink, user, machine.get(), start.toString(), end.toString());
             } else {
-                cacheData = redisManager.getIntegerResult(end, sellDrinkPrefix, drink, user, start.toString(), end.toString());
+                cacheData = redisManager.getIntegerResult(sellDrinkPrefix, drink, user, start.toString(), end.toString());
             }
             if (cacheData.getValue() != null)
                 return cacheData.getValue();
@@ -263,9 +263,9 @@ public class SellController {
 
         if(!redisManager.permitCache(end)) {
             if (municipality.isPresent()) {
-                cacheData = redisManager.getJsonListsResult(end, sellByLocPrefix, province, municipality.get(), user, start.toString(), end.toString());
+                cacheData = redisManager.getJsonListsResult(sellByLocPrefix, province, municipality.get(), user, start.toString(), end.toString());
             } else {
-                cacheData = redisManager.getJsonListsResult(end, sellByLocPrefix, province, user, start.toString(), end.toString());
+                cacheData = redisManager.getJsonListsResult(sellByLocPrefix, province, user, start.toString(), end.toString());
             }
             if (cacheData.getValue() != null)
                 return cacheData.getValue();
@@ -352,9 +352,9 @@ public class SellController {
 
         if(!redisManager.permitCache(end)) {
             if (municipality.isPresent()) {
-                cacheData = redisManager.getJsonListResult(end, sellByLocPrefix, province, municipality.get(), drink, start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(sellByLocPrefix, province, municipality.get(), drink, start.toString(), end.toString());
             } else {
-                cacheData = redisManager.getJsonListResult(end, sellByLocPrefix, province, drink, start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(sellByLocPrefix, province, drink, start.toString(), end.toString());
             }
             if (cacheData.getValue() != null)
                 return cacheData.getValue();
@@ -417,7 +417,7 @@ public class SellController {
         JsonListResult cacheData = null;
 
         if(!redisManager.permitCache(end)) {
-            cacheData = redisManager.getJsonListResult(end, sellByDrinkAllPrefix, top.orElse(10).toString(), start.toString(), end.toString());
+            cacheData = redisManager.getJsonListResult(sellByDrinkAllPrefix, top.orElse(10).toString(), start.toString(), end.toString());
             if (cacheData.getValue() != null)
                 return cacheData.getValue();
             else

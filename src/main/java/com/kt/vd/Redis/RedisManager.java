@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisManager {
 
 
+
     @Resource(name="redisTemplate")
     ValueOperations<String, List<Map<String,Object>>> jsonListOpts;
 
@@ -54,23 +55,21 @@ public class RedisManager {
     }
 
 
-    public JsonListResult getJsonListResult(LocalDate end, String prefix, String... parameters){
+    public JsonListResult getJsonListResult(String prefix, String... parameters){
         String key = this.generateRedisKey(prefix, parameters);
 
         return new JsonListResult(key, jsonListOpts.get(key));
     }
 
 
-    public IntegerResult getIntegerResult(LocalDate end, String prefix, String... parameters){
-
+    public IntegerResult getIntegerResult(String prefix, String... parameters){
         String key = this.generateRedisKey(prefix, parameters);
 
         return new IntegerResult(key, integerOpts.get(key));
     }
 
 
-    public JsonListsResult getJsonListsResult(LocalDate end, String prefix, String... parameters){
-
+    public JsonListsResult getJsonListsResult(String prefix, String... parameters){
         String key = this.generateRedisKey(prefix, parameters);
 
         return new JsonListsResult(key, jsonListsOpts.get(key));

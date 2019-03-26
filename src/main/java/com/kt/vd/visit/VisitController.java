@@ -60,9 +60,9 @@ public class VisitController {
 
         if(!redisManager.permitCache(end)) {
             if (machine.isPresent()) {
-                cacheData = redisManager.getJsonListResult(end, visitByMahcinePrefix, user, machine.get(), start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(visitByMahcinePrefix, user, machine.get(), start.toString(), end.toString());
             } else {
-                cacheData = redisManager.getJsonListResult(end, visitByMahcinePrefix, user, start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(visitByMahcinePrefix, user, start.toString(), end.toString());
             }
             if (cacheData.getValue() != null)
                 return cacheData.getValue();
@@ -133,9 +133,9 @@ public class VisitController {
 
         if(!redisManager.permitCache(end)) {
             if (municipality.isPresent()) {
-                cacheData = redisManager.getJsonListResult(end, visitByLocPrefix, province, municipality.get(), user, start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(visitByLocPrefix, province, municipality.get(), user, start.toString(), end.toString());
             } else {
-                cacheData = redisManager.getJsonListResult(end, visitByLocPrefix, province, user, start.toString(), end.toString());
+                cacheData = redisManager.getJsonListResult(visitByLocPrefix, province, user, start.toString(), end.toString());
             }
             if (cacheData.getValue() != null)
                 return cacheData.getValue();
